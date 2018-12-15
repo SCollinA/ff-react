@@ -19,12 +19,15 @@ const mapStateToProps = ({schedule}) => { // receives store.getState()
 const mapDispatchToProps = (dispatch) => {
     return {
         // name-of-prop : redux-thing
-        makeSchedule: (numWeeks) => dispatch(makeSchedule(numWeeks))
+        makeSchedule: (scheduleInfo) => {
+            console.log('in the smart containers mapDispatchToProps')
+            dispatch(makeSchedule(scheduleInfo))
+        }
         // addWeek: () => dispatch(addWeek()),
         // deleteWeek: () => dispatch(deleteWeek()),
         // addGame: () => dispatch(addGame()),
         // deleteGame: () => dispatch(deleteGame())
-    };
+    }
 }
 
 // #5 Enhance the Dumb Component using the `connect` function

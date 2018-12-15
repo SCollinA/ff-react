@@ -2,12 +2,12 @@ import React from 'react'
 import FFScheduleForm from './FFScheduleForm'
 import FFSchedule from './FFSchedule'
 
-export default function FFScheduler(props) {
+export default function FFSchedulerComponent(props) {
     return (
-        <div className="FFScheduler">
+        <div className="FFSchedulerComponent">
             <h1>{props.title}</h1>
-            <FFScheduleForm />
-            <FFSchedule />
+            <FFScheduleForm makeSchedule={props.makeSchedule} />
+            <FFSchedule schedule={props.schedule} />
         </div>
     )
 }

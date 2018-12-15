@@ -4,7 +4,7 @@ import FFWeek from './FFWeek'
 export default function FFSchedule(props) {
     return (
         <div className="FFSchedule">
-            {props.schedule && props.schedule.map(week => <FFWeek week={week}/>)}
+            {props.schedule.map((week, index) => <FFWeek key={index} weekNumber={index + 1} week={week}/>)}
         </div>
     )
 }

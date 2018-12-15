@@ -4,7 +4,8 @@ import FFGame from './FFGame'
 export default function FFWeek(props) {
     return (
         <div className="FFWeek">
-            {props.week.map(game => <FFGame game={game} />)}
+            <h1>Week {props.weekNumber}</h1>
+            {props.week.map((game, index) => <FFGame key={index} game={game} />)}
         </div>
     )
 }
