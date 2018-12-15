@@ -67,8 +67,7 @@ function assignTeams(divisions, originalTeams) {
     while (teams.length > 0) {
         // get a random team
         const randomTeamIndex = Math.floor(Math.random() * teams.length)
-        const randomTeam = teams.splice(randomTeamIndex, 1)
-        console.log(randomTeam)
+        const randomTeam = teams.splice(randomTeamIndex, 1)[0]
         // get a random division
         let randomDivIndex = Math.floor(Math.random() * divisions.length)
         // check division fill level
@@ -108,6 +107,19 @@ function makeSchedule(league) {
                 // add a random game
                 addGame(randomGame(teams))
                 schedule = store.getState().schedule
+                // check schedule 
+                if (scheduleIsGood(league)) {
+                    // keep going
+                    if (!makeSchedule(league)) {
+                        deleteGame()
+                        return false
+                    }
+                } else {
+                    // remove game
+                    deleteGame()
+                    // report bad path
+                    return false
+                }
             } else {
                 // add another week
                 addWeek()
@@ -115,9 +127,7 @@ function makeSchedule(league) {
             }
         }
     }
-    // check schedule 
-    // return schedule
-    return checkSchedule(league)
+    return schedule
 }
 
 function randomGame(originalTeams) {
@@ -125,19 +135,20 @@ function randomGame(originalTeams) {
     const teams = originalTeams.slice()
     // get one random team
     let randomIndex = Math.floor(Math.random() * teams.length)
-    const randomTeam1 = teams.splice(randomIndex, 1)
+    const randomTeam1 = teams.splice(randomIndex, 1)[0]
     randomIndex = Math.floor(Math.random() * teams.length)
-    const randomTeam2 = teams.splice(randomIndex, 1)
+    const randomTeam2 = teams.splice(randomIndex, 1)[0]
     return [randomTeam1, randomTeam2]
 }
 
-function checkSchedule(league) {
-    const {schedule, teams, divisions, numWeeks} = league
-    if (schedule.length === numWeeks && schedule[schedule.length - 1].length === teams.length / 2) {
-        return schedule
-    } else {
-        return makeSchedule(league)
-    }
+function scheduleIsGood(league) {
+    // const {schedule, teams, divisions, numWeeks} = league
+    // if (schedule.length === numWeeks && schedule[schedule.length - 1].length === teams.length / 2) {
+    //     return schedule
+    // } else {
+    //     return makeSchedule(league)
+    // }
+    return true
 }
 
 function addWeek() {
