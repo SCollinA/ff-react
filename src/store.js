@@ -38,10 +38,10 @@ export const makeSchedule = (scheduleInfo) => {
 }
 
 // export 
-export const addWeek = (numGames) => {
+export const addWeek = (gamesPerWeek) => {
     return {
         ...ADD_WEEK,
-        week: new Array(numGames)
+        week: new Array(gamesPerWeek)
     }
 }
 

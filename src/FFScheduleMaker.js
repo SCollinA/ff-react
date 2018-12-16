@@ -4,20 +4,28 @@ let recursionCounter = 0
 
 export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     console.log('in the schedule maker')
+    // add weeks to schedule
+    makeWeeks(numTeams, numPlayoffTeams)
     // get a copy of the schedule
     const {schedule} = store.getState()
-    // find weeks in regular season
-    const numWeeks = 16 - playoffWeeks(numPlayoffTeams)
-    // add weeks to schedule
-    for (let i = 0; i < numWeeks; i++) {
-        addWeek()
-    }
     // make array of generic team names
     const teams = makeTeams(numTeams)
     // make random divisions
     const divisions = makeDivisions(numDivs, teams)
     const league = {schedule, teams, divisions}
     return addNextGame(league)
+}
+
+function makeWeeks(numTeams, numPlayoffTeams) {
+    // find weeks in regular season
+    const numWeeks = 16 - playoffWeeks(numPlayoffTeams)
+    // find games per week
+    const gamesPerWeek = numTeams / 2
+    // add weeks to schedule
+    console.log('adding weeks')
+    for (let i = 0; i < numWeeks; i++) {
+        addWeek(gamesPerWeek)
+    }
 }
 
 // calculate number of weeks for playoffs
@@ -30,6 +38,8 @@ function playoffWeeks(numPlayoffTeams) {
     }
     return playoffWeeks
 }
+
+
 
 // make array of generic team names
 function makeTeams(numTeams) {
@@ -127,7 +137,7 @@ function addNextGame(league) {
 }
 
 function randomGame(league) {
-    let {schedule, originalTeams, divisions} = league
+    let {schedule, teams, divisions} = league
     const allGames = allGames(teams)
     const scheduledGames = scheduledGames(schedule)
     const unscheduledGames = []
@@ -177,37 +187,31 @@ function scheduledGames(schedule) {
 }
 
 function scheduleIsGood(league) {
-    const {schedule, teams, divisions} = league
-    const scheduledGames = scheduledGames(schedule)
-    // for each week in schedule
-    for (let i = 0; i < schedule.length; i++) {
-        const week = schedule[i]
-        // for each game in week
-        for (let j = 0; j< week.length; j++) {
-            const game = week[j]
+    // const {schedule, teams, divisions} = league
+    // // const scheduledGames = scheduledGames(schedule)
+    // // for each team
+    // for (let i = 0; i < teams.length; i++) {
 
-            // SCHEDULED GAMES WERE REMOVED BEFORE RANDOM GAME CHOSEN
-            // if game has already been scheduled 
-            // if (isScheduled(game, schedule)) {
-            //     return false
-            // } else 
-
-            // if teams do NOT have less than max home/away games
-            if (!homeAwayCompliant(league)) {
-
-                return false
-            // if teams do NOT have less than max non-div games
-            } else if (!nonDivCompliant(league)) {
-
-                return false
-            }
-        }
-            
+    //     // for each week in schedule
+    //     for (let i = 0; i < schedule.length; i++) {
+    //         const week = schedule[i]
+    //         // for each game in week
+    //         for (let j = 0; j< week.length; j++) {
+    //             const game = week[j]
+                // if teams do NOT have less than max home/away games
+    if (!homeAwayCompliant(league)) {
+        
+        return false
+        // if teams do NOT have less than max non-div games
+    } else if (!nonDivCompliant(league)) {
+        
+        return false
     }
+            // }
     return true
 }
 
-function homeAwayCompliant({schedule, teams, divisions}) {
+function homeAwayCompliant({schedule, teams}) {
     // max is length of schedule / 2 rounded up
     const maxHomeAwayGames = Math.ceil(schedule.length / 2)
     // for each team
@@ -229,26 +233,60 @@ function homeAwayCompliant({schedule, teams, divisions}) {
                 } else if (game[1] === team) {
                     // increment away count
                     awayCount++
+                }                
+                // if either is above max
+                if (homeCount > maxHomeAwayGames || awayCount > maxHomeAwayGames) {
+                    return false
                 }
-                
             }
-        }
-        // if either is above max
-        if (homeCount > maxHomeAwayGames || awayCount > maxHomeAwayGames) {
-            return false
         }
     }
     return true
 }
 
-function nonDivCompliant(schedule) {
+function nonDivCompliant({schedule, teams, divisions}) {
+    const maxNonDivGames = 0
+    let nonDivGames = 0
+    // for each team
+    for (let i = 0; i < teams.length; i++) {
+        // for each week
+        for (let j = 0; j < schedule.length; j++) {
+            const week = schedule[j]
+            // for each game
+            for (let k = 0; k < week.length; k++) {
+                const game = week[k]
+                // if game is divisional
+                if (gameIsDivisional(game, divisions)) {
+                    // increment divGame count
+                    nonDivGames++
+                }
+                // if nonDivGame count greater than maxNonDivGames
+                if (nonDivGames > maxNonDivGames) {
+                    return false
+                }
+            }
+        }
+    }
+    return true
+}
 
+function gameIsDivisional(game, divisions) {
+    const homeTeam = game[0]
+    const awayTeam = game[1]
+    // for each division
+    for (let i = 0; i < divisions.length; i++) {
+        const division = divisions[i]
+        // if home team is in division and away team is in division
+        if (division.includes(homeTeam) && division.includes(awayTeam)) {
+            return true
+        }
+    }
     return false
 }
 
-function addWeek() {
-    console.log('we made it add week')
-    store.dispatch(actions.addWeek())
+function addWeek(gamesPerWeek) {
+    console.log('adding week')
+    store.dispatch(actions.addWeek(gamesPerWeek))
 }
 
 // function deleteWeek() {
@@ -257,11 +295,11 @@ function addWeek() {
 // }
 
 function addGame(game) {
-    console.log('we made it add game')
+    console.log('adding game')
     store.dispatch(actions.addGame(game))
 }
 
 function deleteGame() {
-    console.log('we made it del game')
+    console.log('deleting game')
     store.dispatch(actions.deleteGame())
 }
