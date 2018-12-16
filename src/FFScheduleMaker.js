@@ -8,13 +8,13 @@ export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     const {schedule} = store.getState()
     // remove old weeks
     deleteWeeks(schedule)
-    // add weeks to schedule
-    // addWeeks(numPlayoffTeams)
+    // find num weeks in schedule
+    const numWeeks = 16 - playoffWeeks(numPlayoffTeams)
     // make array of generic team names
     const teams = addTeams(numTeams)
     // make random divisions
     const divisions = addDivisions(numDivs, teams)
-    const league = {teams, divisions, numPlayoffTeams}
+    const league = {teams, divisions, numWeeks}
     recursionCounter = 0
     return addNextGame(league)
 }
@@ -26,16 +26,6 @@ function deleteWeeks() {
     for (let i = 0; i < schedule.length; i++) {
         // remove week
         store.dispatch(deleteWeek())
-    }
-}
-
-function addWeeks(numPlayoffTeams) {
-    console.log('adding weeks')
-    // find weeks in regular season
-    const numWeeks = 16 - playoffWeeks(numPlayoffTeams)
-    // add weeks to schedule
-    for (let i = 0; i < numWeeks; i++) {
-        addWeek()
     }
 }
 
@@ -113,8 +103,7 @@ function assignTeams(divisions, originalTeams) {
 function addNextGame(league) {
     console.log(`beginning recursion level ${++recursionCounter}`)
     let {schedule} = store.getState()
-    const {teams, numPlayoffTeams} = league
-    const numWeeks = 16 - playoffWeeks(numPlayoffTeams)
+    const {teams, numWeeks} = league
     // go through each week
     for (let i = 0; i < numWeeks; i++) {
         console.log('inside week')
@@ -153,13 +142,15 @@ function pickRandomGame(league) {
     const scheduledGames = findScheduledGames()
     const unscheduledGames = []
     // for each possible game
-    allGames.forEach(game => { 
+    allGames.forEach(game => {
         // if it is NOT already scheduled
-        if (!scheduledGames.includes(game)) {
+        if (!gameIsScheduled(game, scheduledGames)) {
+            console.log('game not scheduled')
             // add it to unscheduled games
             unscheduledGames.push(game)
         }
     })
+    console.log(unscheduledGames)
     // pick one of the unscheduled games randomly
     return unscheduledGames[Math.floor(Math.random() * unscheduledGames.length)]
 }
@@ -198,6 +189,16 @@ function findScheduledGames() {
         }
     }
     return scheduledGamesArray
+}
+
+function gameIsScheduled(game, scheduledGames) {
+    console.log('checking if game is scheduled')
+    for (let i = 0; i < scheduledGames.length; i++) {
+        if (game[0] === scheduledGames[i][0] && game[1] === scheduledGames[i][1]) {
+            return true
+        }
+    }
+    return false
 }
 
 function checkPath(league) {
@@ -265,10 +266,9 @@ function homeAwayCompliant({teams}) {
     return true
 }
 
-function nonDivCompliant({teams, divisions}) {
+function nonDivCompliant({teams, divisions, numWeeks}) {
     console.log('checking non div compliance')
     const {schedule} = store.getState()
-    const numWeeks = schedule.length
     const teamsPerDiv = divisions[0].length
     const maxNonDivGames = numWeeks - ((teamsPerDiv - 1) * 2)
     let nonDivGames = 0
@@ -280,9 +280,9 @@ function nonDivCompliant({teams, divisions}) {
             // for each game
             for (let k = 0; k < week.length; k++) {
                 const game = week[k]
-                // if game is divisional
-                if (gameIsDivisional(game, divisions)) {
-                    // increment divGame count
+                // if game is NOT divisional
+                if (!gameIsDivisional(game, divisions)) {
+                    // increment nonDivGame count
                     nonDivGames++
                 }
                 // if nonDivGame count greater than maxNonDivGames
@@ -322,12 +322,10 @@ function deleteWeek() {
 
 function addGame(game) {
     console.log('adding game')
-    console.log(store.getState())
     store.dispatch(actions.addGame(game))
 }
 
 function deleteGame() {
     console.log('deleting game')
-    console.log(store.getState())
     store.dispatch(actions.deleteGame())
 }
