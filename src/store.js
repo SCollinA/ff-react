@@ -88,11 +88,11 @@ const game = (state=defaultState, action) => {
                     action.week
                 ]
             }
-        // case DEL_WEEK.type:
-        //     return {
-        //         // remove last week
-        //         schedule: [...state.schedule.slice(0, state.schedule.length - 2)]
-        //     }
+        case DEL_WEEK.type:
+            return {
+                // remove last week
+                schedule: [...state.schedule.slice(0, state.schedule.length - 1)]
+            }
         case ADD_GAME.type:
             return {
                 // schedule must have one week
