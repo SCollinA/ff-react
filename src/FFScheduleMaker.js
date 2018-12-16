@@ -13,7 +13,7 @@ export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     // make random divisions
     const divisions = makeDivisions(numDivs, teams)
     const league = {schedule, teams, divisions, numWeeks}
-    return makeSchedule(league)
+    return addNextGame(league)
 }
 
 // calculate number of weeks for playoffs
@@ -87,7 +87,7 @@ function assignTeams(divisions, originalTeams) {
 }
 
 // this is the recursive function
-function makeSchedule(league) {
+function addNextGame(league) {
     recursionCounter = 0
     console.log(league)
     let {schedule, teams, divisions, numWeeks} = league
@@ -99,18 +99,19 @@ function makeSchedule(league) {
             // add a week
             addWeek()
             schedule = store.getState().schedule
+            addNextGame(league)
         } else {
             // get the last week
             const week = schedule[schedule.length - 1]
             // if the week isn't full of games
             if (week.length < teams.length / 2) {
                 // add a random game
-                addGame(randomGame(teams))
+                addGame(randomGame(league))
                 schedule = store.getState().schedule
                 // check schedule 
                 if (scheduleIsGood(league)) {
                     // keep going
-                    if (!makeSchedule(league)) {
+                    if (!addNextGame(league)) {
                         deleteGame()
                         return false
                     }
@@ -120,17 +121,28 @@ function makeSchedule(league) {
                     // report bad path
                     return false
                 }
-            } else {
+            } else if (schedule.length < numWeeks) {
                 // add another week
                 addWeek()
                 schedule = store.getState().schedule
+                addNextGame(league)
             }
         }
     }
     return schedule
 }
 
-function randomGame(originalTeams) {
+function randomGame(league) {
+    let {schedule, teams, divisions, numWeeks} = league
+    const allGames = allGames(teams)
+    const scheduledGames = scheduledGames(schedule)
+    const unscheduledGames = []
+    allGames.forEach(game { 
+        if (!scheduledGames.includes(game)) {
+            unscheduledGames.push(game)
+            allGames.splice(index)
+        }
+    }
     // make a copy of the teams list
     const teams = originalTeams.slice()
     // get one random team
@@ -141,12 +153,17 @@ function randomGame(originalTeams) {
     return [randomTeam1, randomTeam2]
 }
 
+function allGames(teams) {
+
+}
+
 function scheduleIsGood(league) {
-    // const {schedule, teams, divisions, numWeeks} = league
+    const {schedule, teams, divisions, numWeeks} = league
     // if (schedule.length === numWeeks && schedule[schedule.length - 1].length === teams.length / 2) {
     //     return schedule
     // } else {
     //     return makeSchedule(league)
+
     // }
     return true
 }
