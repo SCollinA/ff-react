@@ -1,7 +1,5 @@
 import store, * as actions from './store'
 
-let recursionCounter = 0
-
 export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     console.log('in the schedule maker')
     // get a copy of the schedule
@@ -15,7 +13,6 @@ export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     // make random divisions
     const divisions = addDivisions(numDivs, teams)
     const league = {teams, divisions, numWeeks}
-    recursionCounter = 0
     console.log(league)
     return addNextGame(league)
 }
@@ -102,7 +99,6 @@ function assignTeams(divisions, originalTeams) {
 
 // this is the recursive function
 function addNextGame(league) {
-    console.log(`beginning recursion level ${++recursionCounter}`)
     let {schedule} = store.getState()
     const {teams, numWeeks} = league
     // go through each week
@@ -115,33 +111,40 @@ function addNextGame(league) {
             addWeek()
             schedule = store.getState().schedule
         }
-        const week = schedule[i] 
+        let week = schedule[i] 
         // keep track of checked games by the week
         const checkedGames = []
         // while the week isn't full of games
         while (week && week.length < teams.length / 2) {
             // pick and add random game
-            // and check it
+            // check it
             checkedGames.push(addRandomGame({...league, checkedGames}))
             // and check path
             // if checkPath returns good schedule 
             if (checkPath(league)) {
                 break
-            }        
+            } 
+            // update schedule and week
+            schedule = store.getState().schedule
+            week = schedule[i]
         }
     }
     // get updated schedule
-    schedule = store.getState()
+    schedule = store.getState().schedule
     return schedule
 }
 
 function addRandomGame(league) {
     // pick a random game
     const randomGame = pickRandomGame(league)
-    console.log(`trying game ${randomGame}`)
-    // add it
-    addGame(randomGame)
-    return randomGame
+    if (randomGame) {
+        console.log(`trying game ${randomGame}`)
+        // add it
+        addGame(randomGame)
+        return randomGame
+    } else {
+        return []
+    }
 }
 
 function pickRandomGame(league) {
@@ -159,7 +162,12 @@ function pickRandomGame(league) {
         }
     })
     // pick one of the available games randomly
-    return availableGames[Math.floor(Math.random() * availableGames.length)]
+    if (availableGames.length > 1) {
+        return availableGames[Math.floor(Math.random() * availableGames.length)]
+    } else {
+        // if no games are available
+        return false
+    }
 }
 
 function findAllGames(teams) {
@@ -199,15 +207,16 @@ function findScheduledGames() {
 }
 
 function teamsPlayingAlready(game) {
+    // console.log('checking if teams are already playing')
     const playingTeams = findPlayingTeams()
     if (playingTeams.includes(game[0]) || playingTeams.includes(game[1])) {
-        console.clear()
         return true
     }
     return false
 }
 
 function findPlayingTeams() {
+    // console.log('finding teams playing this week')
     const {schedule} = store.getState()
     const lastWeek = schedule[schedule.length - 1]
     const teamsArray = []
@@ -216,7 +225,8 @@ function findPlayingTeams() {
         const game = lastWeek[i]
         if (!teamsArray.includes(game[0])) {
             teamsArray.push(game[0])
-        } else if (!teamsArray.includes(game[1])) {
+        } 
+        if (!teamsArray.includes(game[1])) {
             teamsArray.push(game[1])
         }
     }
