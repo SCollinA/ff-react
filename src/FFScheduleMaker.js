@@ -9,12 +9,12 @@ export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     // remove old weeks
     deleteWeeks(schedule)
     // add weeks to schedule
-    addWeeks(numPlayoffTeams)
+    // addWeeks(numPlayoffTeams)
     // make array of generic team names
     const teams = addTeams(numTeams)
     // make random divisions
     const divisions = addDivisions(numDivs, teams)
-    const league = {teams, divisions}
+    const league = {teams, divisions, numPlayoffTeams}
     recursionCounter = 0
     return addNextGame(league)
 }
@@ -112,12 +112,17 @@ function assignTeams(divisions, originalTeams) {
 // this is the recursive function
 function addNextGame(league) {
     console.log(`beginning recursion level ${++recursionCounter}`)
-    const {schedule} = store.getState()
-    const {teams} = league
+    let {schedule} = store.getState()
+    const {teams, numPlayoffTeams} = league
+    const numWeeks = 16 - playoffWeeks(numPlayoffTeams)
     // go through each week
-    for (let i = 0; i < schedule.length; i++) {
+    for (let i = 0; i < numWeeks; i++) {
         console.log('inside week')
-        const week = schedule[i]
+        if (!schedule[i]) {
+            addWeek()
+            schedule = store.getState().schedule
+        }
+        const week = schedule[i] 
         // keep track of checked games by the week
         const checkedGames = []
         // while the week isn't full of games
@@ -126,7 +131,7 @@ function addNextGame(league) {
             // and check it
             checkedGames.push(addRandomGame(league))
             // and check path
-            checkPath(league)            
+            return checkPath(league)            
         }
     }
     return schedule

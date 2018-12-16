@@ -98,7 +98,7 @@ const game = (state=defaultState, action) => {
                 // schedule must have one week
                 schedule: state.schedule.length > 0 ?
                  [    // every week prior to this week
-                    ...state.schedule.slice(0, state.schedule.length - 2),
+                    ...state.schedule.slice(0, state.schedule.length - 1),
                     [   // every game prior to this game
                         ...lastWeek,
                         action.game
@@ -110,9 +110,9 @@ const game = (state=defaultState, action) => {
             return {
                 schedule: [
                     // remove last week,
-                    ...state.schedule.slice(0, state.schedule.length - 2),
+                    ...state.schedule.slice(0, state.schedule.length - 1),
                     // then remove last game
-                    lastWeek.slice(0, lastWeek.length - 2)
+                    lastWeek.slice(0, lastWeek.length - 1)
                 ]
             }
         default:
