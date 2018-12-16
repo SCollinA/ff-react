@@ -8,11 +8,15 @@ export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     const {schedule} = store.getState()
     // find weeks in regular season
     const numWeeks = 16 - playoffWeeks(numPlayoffTeams)
+    // add weeks to schedule
+    for (let i = 0; i < numWeeks; i++) {
+        addWeek()
+    }
     // make array of generic team names
     const teams = makeTeams(numTeams)
     // make random divisions
     const divisions = makeDivisions(numDivs, teams)
-    const league = {schedule, teams, divisions, numWeeks}
+    const league = {schedule, teams, divisions}
     return addNextGame(league)
 }
 
@@ -90,82 +94,156 @@ function assignTeams(divisions, originalTeams) {
 function addNextGame(league) {
     recursionCounter = 0
     console.log(league)
-    let {schedule, teams, divisions, numWeeks} = league
+    let {schedule, teams, divisions} = league
     console.log(`beginning recursion level ${++recursionCounter}`)
-    // if the schedule isn't full of weeks
-    if (schedule.length <= numWeeks) {
-        // if the schedule is empty
-        if (schedule.length === 0) {
-            // add a week
-            addWeek()
+    // go through each week
+    for (let i = 0; i < schedule.length; i++) {
+        const week = schedule[i]
+        // keep track of checked games by the week
+        const checkedGames = []
+        // while the week isn't full of games
+        while (week.length < teams.length / 2) {
+            // pick a random game
+            const randomGame = randomGame(league)
+            // check it
+            checkedGames.push(randomGame)
+            // add it
+            addGame(randomGame)
             schedule = store.getState().schedule
-            addNextGame(league)
-        } else {
-            // get the last week
-            const week = schedule[schedule.length - 1]
-            // if the week isn't full of games
-            if (week.length < teams.length / 2) {
-                // add a random game
-                addGame(randomGame(league))
-                schedule = store.getState().schedule
-                // check schedule 
-                if (scheduleIsGood(league)) {
-                    // keep going
-                    if (!addNextGame(league)) {
-                        deleteGame()
-                        return false
-                    }
-                } else {
-                    // remove game
-                    deleteGame()
-                    // report bad path
-                    return false
-                }
-            } else if (schedule.length < numWeeks) {
-                // add another week
-                addWeek()
-                schedule = store.getState().schedule
-                addNextGame(league)
+            // check schedule 
+            if (scheduleIsGood(league)) {
+                // keep going
+                return addNextGame(league)
+            } else {
+                // remove game
+                deleteGame()
+                // report bad path
+                return false
             }
         }
     }
+
     return schedule
 }
 
 function randomGame(league) {
-    let {schedule, teams, divisions, numWeeks} = league
+    let {schedule, originalTeams, divisions} = league
     const allGames = allGames(teams)
     const scheduledGames = scheduledGames(schedule)
     const unscheduledGames = []
-    allGames.forEach(game { 
+    // for each possible game
+    allGames.forEach(game => { 
+        // if it is NOT already scheduled
         if (!scheduledGames.includes(game)) {
+            // add it to unscheduled games
             unscheduledGames.push(game)
-            allGames.splice(index)
         }
-    }
-    // make a copy of the teams list
-    const teams = originalTeams.slice()
-    // get one random team
-    let randomIndex = Math.floor(Math.random() * teams.length)
-    const randomTeam1 = teams.splice(randomIndex, 1)[0]
-    randomIndex = Math.floor(Math.random() * teams.length)
-    const randomTeam2 = teams.splice(randomIndex, 1)[0]
-    return [randomTeam1, randomTeam2]
+    })
+    // pick one of the unscheduled games randomly
+    return unscheduledGames[Math.floor(Math.random() * unscheduledGames.length)]
 }
 
 function allGames(teams) {
+    const allGamesArray = []
+    // take each team
+    for (let i = 0; i < teams.length; i++) {
+        // make a game
+        const game = []
+        // push to game
+        game.push(teams[i])
+        // take each other team
+        for (let j = 0; j < teams.length; j++) {
+            if (teams[j] !== game[0]) {
+                // push to game
+                game.push(teams[j])
+                allGamesArray.push(game.slice())
+                game.pop()
+            }
+        }
+        // push to all games array
+    }
+    return allGamesArray
+}
 
+function scheduledGames(schedule) {
+    const scheduledGamesArray = []
+    for (let i = 0; i < schedule.length; i++) {
+        const week = schedule[i]
+        for (let j = 0; j < week.length; j++) {
+            scheduledGamesArray.push(week[j])
+        }
+    }
+    return scheduledGamesArray
 }
 
 function scheduleIsGood(league) {
-    const {schedule, teams, divisions, numWeeks} = league
-    // if (schedule.length === numWeeks && schedule[schedule.length - 1].length === teams.length / 2) {
-    //     return schedule
-    // } else {
-    //     return makeSchedule(league)
+    const {schedule, teams, divisions} = league
+    const scheduledGames = scheduledGames(schedule)
+    // for each week in schedule
+    for (let i = 0; i < schedule.length; i++) {
+        const week = schedule[i]
+        // for each game in week
+        for (let j = 0; j< week.length; j++) {
+            const game = week[j]
 
-    // }
+            // SCHEDULED GAMES WERE REMOVED BEFORE RANDOM GAME CHOSEN
+            // if game has already been scheduled 
+            // if (isScheduled(game, schedule)) {
+            //     return false
+            // } else 
+
+            // if teams do NOT have less than max home/away games
+            if (!homeAwayCompliant(league)) {
+
+                return false
+            // if teams do NOT have less than max non-div games
+            } else if (!nonDivCompliant(league)) {
+
+                return false
+            }
+        }
+            
+    }
     return true
+}
+
+function homeAwayCompliant({schedule, teams, divisions}) {
+    // max is length of schedule / 2 rounded up
+    const maxHomeAwayGames = Math.ceil(schedule.length / 2)
+    // for each team
+    for (let i = 0; i < teams.length; i++) {
+        const team = teams[i]
+        let homeCount = 0
+        let awayCount = 0
+        // for each week
+        for (let j = 0; j < schedule.length; j++) {
+            const week = schedule[j]
+            // for each game
+            for (let k = 0; k < week.length; k++) {
+                const game = schedule[k]
+                // if home game
+                if (game[0] === team) {
+                    // increment home count
+                    homeCount++
+                    // if away game
+                } else if (game[1] === team) {
+                    // increment away count
+                    awayCount++
+                }
+                
+            }
+        }
+        // if either is above max
+        if (homeCount > maxHomeAwayGames || awayCount > maxHomeAwayGames) {
+            return false
+        }
+    }
+    return true
+}
+
+function nonDivCompliant(schedule) {
+
+    return false
 }
 
 function addWeek() {
@@ -173,10 +251,10 @@ function addWeek() {
     store.dispatch(actions.addWeek())
 }
 
-function deleteWeek() {
-    console.log('we made it del week')
-    store.dispatch(actions.deleteWeek())
-}
+// function deleteWeek() {
+//     console.log('we made it del week')
+//     store.dispatch(actions.deleteWeek())
+// }
 
 function addGame(game) {
     console.log('we made it add game')
