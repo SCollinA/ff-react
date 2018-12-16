@@ -31,9 +31,10 @@ const DEL_GAME = {
 
 export const makeSchedule = (scheduleInfo) => {
     console.log('in the stores make schedule')
+    ffScheduleMaker(scheduleInfo)
     return {
         ...MAKE_SCHEDULE,
-        schedule: ffScheduleMaker(scheduleInfo)
+        schedule: []
     }
 }
 
@@ -74,6 +75,7 @@ const game = (state=defaultState, action) => {
     if (!action) {
         return state;
     }
+    const lastWeek = state.schedule.length > 0 ? state.schedule[state.schedule.length - 1] : []
     switch(action.type) {
         case MAKE_SCHEDULE.type:
             return {
@@ -98,20 +100,19 @@ const game = (state=defaultState, action) => {
                  [    // every week prior to this week
                     ...state.schedule.slice(0, state.schedule.length - 2),
                     [   // every game prior to this game
-                        ...state.schedule[state.schedule.length - 1],
+                        ...lastWeek,
                         action.game
                     ] 
                 ] : state.schedule
                     
             }
         case DEL_GAME.type:
-            const lastWeek = state.schedule.length > 0 ? state.schedule[state.schedule.length - 1] : []
             return {
                 schedule: [
                     // remove last week,
                     ...state.schedule.slice(0, state.schedule.length - 2),
                     // then remove last game
-                    lastWeek.slice(0, state.schedule.length - 2)
+                    lastWeek.slice(0, lastWeek.length - 2)
                 ]
             }
         default:

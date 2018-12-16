@@ -3,7 +3,6 @@ import FFScheduleForm from './FFScheduleForm'
 import FFSchedule from './FFSchedule'
 
 export default function FFSchedulerComponent(props) {
-    console.log(props.schedule)
     return (
         <div className="FFSchedulerComponent">
             <h1>{props.title}</h1>

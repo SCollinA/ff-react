@@ -11,9 +11,9 @@ export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     // add weeks to schedule
     addWeeks(numPlayoffTeams)
     // make array of generic team names
-    const teams = makeTeams(numTeams)
+    const teams = addTeams(numTeams)
     // make random divisions
-    const divisions = makeDivisions(numDivs, teams)
+    const divisions = addDivisions(numDivs, teams)
     const league = {teams, divisions}
     recursionCounter = 0
     return addNextGame(league)
@@ -51,7 +51,7 @@ function playoffWeeks(numPlayoffTeams) {
 }
 
 // make array of generic team names
-function makeTeams(numTeams) {
+function addTeams(numTeams) {
     console.log('making new teams')
     const teams = []
     while (numTeams > 0) {
@@ -62,7 +62,7 @@ function makeTeams(numTeams) {
 }
 
 // make random divisions
-function makeDivisions(numDivs, originalTeams) {
+function addDivisions(numDivs, originalTeams) {
     console.log('making divisions')
     // make new divisions list
     const divisions = makeDivisionsList(numDivs)
@@ -125,8 +125,8 @@ function addNextGame(league) {
             // pick and add random game
             // and check it
             checkedGames.push(addRandomGame(league))
-            // check path 
-            checkPath(league)
+            // and check path
+            checkPath(league)            
         }
     }
     return schedule
@@ -317,10 +317,12 @@ function deleteWeek() {
 
 function addGame(game) {
     console.log('adding game')
+    console.log(store.getState())
     store.dispatch(actions.addGame(game))
 }
 
 function deleteGame() {
     console.log('deleting game')
+    console.log(store.getState())
     store.dispatch(actions.deleteGame())
 }
