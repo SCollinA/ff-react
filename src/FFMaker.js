@@ -4,7 +4,7 @@ export default function makeSchedule(userSettings) {
     resetSchedule()
     storeSettings(userSettings)
     setupLeague()
-    // assignGames()
+    assignGames()
 }
 
 function resetSchedule() {
@@ -50,6 +50,7 @@ function assignGames() {
 }
 
 function assignDivGames(divGames) {
+    console.log(divGames)
     // get all the weeks
     let {settings, weeks} = store.getState()
     // assign each one to schedule until none remain
@@ -155,6 +156,7 @@ function addGames() {
             const awayTeam = teams[j]
             if (homeTeam.id !== awayTeam.id) {
                 addGame(homeTeam, awayTeam)
+                // addGame(awayTeam, homeTeam)
             }
         }
     }
