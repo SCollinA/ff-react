@@ -6,7 +6,6 @@ export default function FFScheduleForm(props) {
         <form className="FFScheduleForm" 
         onSubmit={event => {
             event.preventDefault()
-            console.log('in the ff schedule form')
             const { numPlayoffTeams, numDivs, numTeams } = event.target
             makeSchedule({numTeams: numTeams.value, numDivs: numDivs.value, numPlayoffTeams:  numPlayoffTeams.value})
         }}

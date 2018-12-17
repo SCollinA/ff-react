@@ -50,6 +50,7 @@ async function assignGames() {
 }
 
 function assignDivGames(divGames) {
+    console.log(divGames.length, store.getState().games.length)
     // get all the weeks
     let {settings, weeks} = store.getState()
     // assign each one to schedule until none remain
@@ -58,10 +59,10 @@ function assignDivGames(divGames) {
         // pick and remove random game
         const game = divGames.splice(randomGameIndex, 1)[0]
         // filter out weeks that already have these teams playing
-        weeks = weeks.filter(week => !teamsAlreadyPlaying(game, week))
+        let openWeeks = weeks.filter(week => !teamsAlreadyPlaying(game, week))
         // pick a random week
-        const randomWeekIndex = Math.floor(Math.random() * weeks.length)
-        const week = weeks[randomWeekIndex]
+        const randomOpenWeekIndex = Math.floor(Math.random() * openWeeks.length)
+        const week = openWeeks[randomOpenWeekIndex]
         assignGame(game, week)
         // update weeks and filter for incomplete weeks
         weeks = store.getState().weeks.filter(week => week.games.length < settings.gamesPerWeek)
@@ -70,14 +71,25 @@ function assignDivGames(divGames) {
 
 function teamsAlreadyPlaying(game, week) {
     const teams = [game.homeTeam.id, game.awayTeam.id]
-    const teamsPlaying = []
-    week.games.forEach(game => teamsPlaying.push(...[game.homeTeam.id, game.awayTeam.id]))
-    console.log(teamsPlaying)
+    const teamsPlaying = findTeamsPlaying(week).map(team => team.id)
     if (teamsPlaying.includes(teams[0]) || teamsPlaying.includes(teams[1])) {
         return true
     } else {
         return false
     }
+}
+
+function findTeamsPlaying(week) {
+    const teams = []
+    week.games.forEach(game => {
+        const {homeTeam, awayTeam} = game
+        if (!teams.includes(homeTeam)) {
+            teams.push(homeTeam)
+        } else if (!teams.includes(awayTeam)) {
+            teams.push(awayTeam)
+        }
+    })
+    return teams
 }
 
 function assignNonDivGames(nonDivGames) {

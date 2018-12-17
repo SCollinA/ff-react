@@ -242,21 +242,21 @@ const game = (state=defaultState, action) => {
                 ]
             }
         case ASSIGN_GAME.type:
-            return {
-                ...state,
-                weeks: state.weeks.map(week => {
-                    if (week.id === action.week.id) {
-                        return {
-                            ...week,
-                            games: [
-                                ...week.games,
-                                action.game
-                            ]
-                        }
-                    } else {
-                        return week
+        return {
+            ...state,
+            weeks: state.weeks.map(week => {
+                if (week.id === action.week.id) {
+                    return {
+                        ...week,
+                        games: [
+                            ...week.games,
+                            action.game
+                        ]
                     }
-                })
+                } else {
+                    return week
+                }
+            })
             }
         default:
             return state;
