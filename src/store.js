@@ -1,6 +1,5 @@
 
 import { createStore } from 'redux';
-import ffScheduleMaker from './FFScheduleMaker';
 
 // import uuid from 'uuid/v4';
 
@@ -29,19 +28,18 @@ const DEL_GAME = {
     type: 'DEL_GAME',
 }
 
-export const makeSchedule = (scheduleInfo) => {
-    console.log('in the stores make schedule')
+export const makeSchedule = () => {
     return {
         ...MAKE_SCHEDULE,
-        schedule: ffScheduleMaker(scheduleInfo)
+        schedule: []
     }
 }
 
 // export 
-export const addWeek = (numGames) => {
+export const addWeek = () => {
     return {
         ...ADD_WEEK,
-        week: new Array(numGames)
+        week: []
     }
 }
 
