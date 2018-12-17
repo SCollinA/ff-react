@@ -1,139 +1,149 @@
 
 import { createStore } from 'redux';
 
-// import uuid from 'uuid/v4';
+import uuid from 'uuid/v4';
+import { stat } from 'fs';
 
 
 const defaultState = {
-    userSettings: {
-        numTeams: 8,
+    settings: {
+        numWeeks: 14,
+        gamesPerWeek: 6,
         numDivs: 2,
-        numPlayoffTeams: 4
+        teamsPerDiv: 6,
+        maxNonDivGames: 4,
+        maxHomeAwayGames: 7,
     },
-    league: {
-        teams: [],
-        divisions: []
-    },
-    schedule: []
+    weeks: [ // schedule is list of weeks
+        // {
+        //     id: uuid(),
+        //     games: [ // weeks are lists of games
+        //         {   // games are two teams
+        //             id: uuid(),
+        //             homeTeam: {
+        //                 id: uuid(),
+        //                 name: 'HomeTeam'
+        //             },
+        //             awayTeam: {
+        //                 id: uuid(),
+        //                 name: 'AwayTeam'
+        //             }
+        //         }
+        //     ]
+        // }
+    ],
+    divisions: [
+        // {
+        //     id: uuid(),
+        //     teams: [
+        //         {
+        //             id: uuid(),
+        //             name: 'divTeam'
+        //         }
+        //     ]
+        // }
+    ],
+    teams: [
+        // {
+        //     id: uuid(),
+        //     name: 'sampleTeam'
+        // }
+    ],
+    games: [
+        // {
+        //     id: uuid(),
+        //     homeTeam: {
+        //         id: uuid(),
+        //         name: 'HomeTeam'
+        //     },
+        //     awayTeam: {
+        //         id: uuid(),
+        //         name: 'AwayTeam'
+        //     }
+        // }
+    ]
+
 }
 
-
-
-
-const MAKE_SCHEDULE = {
-    type: 'MAKE_SCHEDULE',
-}
-
-const ADD_TEAM = {
-    type: 'ADD_TEAM',
+// consts
+const STORE_SETTINGS = {
+    type: 'STORE_SETTINGS'
 }
 
 const ADD_DIVISION = {
-    type: 'ADD_DIVISION',
+    type: 'ADD_DIVISION'
+}
+
+const ADD_TEAM = {
+    type: 'ADD_TEAM'
 }
 
 const ASSIGN_TEAM = {
-    type: 'ASSIGN_TEAM',
-}
-
-const ADD_WEEK = {
-    type: 'ADD_WEEK',
-}
-
-const DEL_WEEK = {
-    type: 'DEL_WEEK'
+    type: 'ASSIGN_TEAM'
 }
 
 const ADD_GAME = {
-    type: 'ADD_GAME',
-};
-
-const DEL_GAME = {
-    type: 'DEL_GAME',
+    type: 'ADD_GAME'
 }
 
-export const makeSchedule = (userSettings) => {
-    return {
-        ...MAKE_SCHEDULE,
-        userSettings,
-    }
+const ASSIGN_GAME = {
+    type: 'ASSIGN_GAME'
 }
 
-export const addTeam = (team) => {
+// exports
+export const storeSettings = (settings) => {
     return {
-        ...ADD_TEAM,
-        team
-        // league: {
-        //     ...league,
-        //     teams: [
-        //         ...teams,
-        //         team
-        //     ]
-        // }
+        ...STORE_SETTINGS,
+        settings
     }
 }
 
 export const addDivision = () => {
     return {
         ...ADD_DIVISION,
-        // league: {
-        //     ...league,
-        //     divisions: [
-        //         ...divisions,
-        //         []
-        //     ]
-        // }
+        newDivision: {
+            id: uuid(),
+            teams: []
+        }
     }
 }
 
-export const assignTeam = ({team, divIndex}) => {
+export const addTeam = (teamName) => {
+    return {
+        ...ADD_TEAM,
+        newTeam: {
+            id: uuid(),
+            name: teamName
+        }
+    }
+}
+
+export const assignTeam = (team, division) => {
     return {
         ...ASSIGN_TEAM,
-        // league: {
-        //     ...league,
-        //     divisions: [
-        //         ...divisions.slice(0, divIndex),
-        //         [
-        //             ...divisions[divIndex],
-        //             team
-        //         ],
-        //         ...divisions.slice(divIndex)
-        //     ]
-        // }
+        team,
+        division
     }
 }
 
-// export 
-export const addWeek = () => {
-    return {
-        ...ADD_WEEK,
-        // week: []
-    }
-}
-
-// export 
-export const deleteWeek = () => {
-    return {
-        ...DEL_WEEK
-    }
-}
-
-// export 
-export const addGame = (game) => {
+export const addGame = (homeTeam, awayTeam) {
     return {
         ...ADD_GAME,
-        game
-    };
-};
-
-// export 
-export const deleteGame = () => {
-    return {
-        ...DEL_GAME,
+        game: {
+            id: uuid(),
+            homeTeam,
+            awayTeam
+        }
     }
 }
 
-
+export const assignGame = (game, week) => {
+    return {
+        ...ASSIGN_GAME,
+        game,
+        week
+    }
+}
 //Reducer
 
 const game = (state=defaultState, action) => {
@@ -141,79 +151,62 @@ const game = (state=defaultState, action) => {
         return state;
     }
     switch(action.type) {
-        case MAKE_SCHEDULE.type:
+        case STORE_SETTINGS.type:
             return {
-                ...defaultState,
-                userSettings: action.userSettings,
-            }
-        case ADD_TEAM.type:
-            return {
-                league: {
-                    ...league,
-                    teams: [
-                        ...teams,
-                        action.team
-                    ]
-                }
+                settings: action.settings
             }
         case ADD_DIVISION.type:
             return {
-                league: {
-                    ...state.league,
-                    divisions: [
-                        ...state.league.divisions,
-                        []
-                    ]
-                }
+                divisions: [
+                    ...state.divisions,
+                    action.newDivision
+                ]
+            }
+        case ADD_TEAM.type:
+            return {
+                teams: [
+                    ...state.teams,
+                    action.newTeam
+                ]
             }
         case ASSIGN_TEAM.type:
             return {
-                league: {
-                    ...state.league,
-                    divisions: [
-                        ...state.league.divisions.slice(0, divIndex),
-                        [
-                            ...state.league.divisions[divIndex],
-                            team
-                        ],
-                        ...state.league.divisions.slice(divIndex)
-                    ]
-                }
-            }
-        case ADD_WEEK.type:
-            return {
-                schedule: [
-                    ...state.schedule,
-                    []
-                ]
-            }
-        case DEL_WEEK.type:
-            return {
-                // remove last week
-                schedule: [...state.schedule.slice(0, state.schedule.length - 2)]
+                divisions: state.divisions.map(division => {
+                    if (division.id === action.division.id) {
+                        return {
+                            ...division,
+                            teams: [
+                                ...division.teams,
+                                action.team
+                            ]
+                        }
+                    } else {
+                        return division
+                    }
+                })
             }
         case ADD_GAME.type:
             return {
-                // schedule must have one week
-                schedule: state.schedule.length > 0 ?
-                 [    // every week prior to this week
-                    ...state.schedule.slice(0, state.schedule.length - 2),
-                    [
-                        ...state.schedule[state.schedule.length - 1],
-                        action.game
-                    ] 
-                ] : state.schedule
-                    
-            }
-        case DEL_GAME.type:
-            const lastWeek = state.schedule.length > 0 ? state.schedule[state.schedule.length - 1] : []
-            return {
-                schedule: [
-                    // remove last week,
-                    ...state.schedule.slice(0, state.schedule.length - 2),
-                    // then remove last game
-                    lastWeek.slice(0, state.schedule.length - 2)
+                games: [
+                    ...state.games,
+                    action.game
                 ]
+            }
+        case ASSIGN_GAME.type:
+            return {
+                schedule: state.schedule.map(week => {
+                    if (week.id === action.week.id) {
+                        return {
+                            ...week,
+                            games: [
+                                ...games,
+                                action.game
+                            ]
+                        }
+                    } else {
+                        return week
+                    }
+                })
             }
         default:
             return state;
