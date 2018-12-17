@@ -66,6 +66,11 @@ function assignDivGames(divGames) {
     }
 }
 
+function assignNonDivGames(nonDivGames) {
+    // console.log(nonDivGames)
+}
+
+// SETUP LEAGUE
 function findAllGames() {
     const {games} = store.getState()
     const divGames = []
@@ -82,15 +87,10 @@ function findAllGames() {
     return {divGames, nonDivGames}
 }
 
-function assignNonDivGames(nonDivGames) {
-    // console.log(nonDivGames)
-}
-
 function assignGame(game, week) {
     store.dispatch(actions.assignGame(game, week))
 }
 
-// SETUP LEAGUE
 function addDivisions(numDivs) {
     for (let i = 0; i < numDivs; i++) {
         // add divs to league
