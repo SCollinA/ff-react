@@ -127,7 +127,7 @@ export const assignTeam = (team, division) => {
 export const addGame = (homeTeam, awayTeam) => {
     return {
         ...ADD_GAME,
-        game: {
+        newGame: {
             id: uuid(),
             homeTeam,
             awayTeam
@@ -151,17 +151,20 @@ const game = (state=defaultState, action) => {
     switch(action.type) {
         case STORE_SETTINGS.type:
             return {
+                ...state,
                 settings: action.settings
             }
         case ADD_DIVISION.type:
             return {
-                divisions: [
+                ...state,
+                divisions: state.divisions ? [
                     ...state.divisions,
                     action.newDivision
-                ]
+                ] : [action.newDivision]
             }
         case ADD_TEAM.type:
             return {
+                ...state,
                 teams: [
                     ...state.teams,
                     action.newTeam
@@ -169,6 +172,7 @@ const game = (state=defaultState, action) => {
             }
         case ASSIGN_TEAM.type:
             return {
+                ...state,
                 divisions: state.divisions.map(division => {
                     if (division.id === action.division.id) {
                         return {
@@ -185,13 +189,15 @@ const game = (state=defaultState, action) => {
             }
         case ADD_GAME.type:
             return {
+                ...state,
                 games: [
                     ...state.games,
-                    action.game
+                    action.newGame
                 ]
             }
         case ASSIGN_GAME.type:
             return {
+                ...state,
                 schedule: state.schedule.map(week => {
                     if (week.id === action.week.id) {
                         return {
