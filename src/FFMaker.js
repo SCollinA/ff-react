@@ -57,12 +57,26 @@ function assignDivGames(divGames) {
         const randomGameIndex = Math.floor(Math.random() * divGames.length)
         // pick and remove random game
         const game = divGames.splice(randomGameIndex, 1)[0]
+        // filter out weeks that already have these teams playing
+        weeks = weeks.filter(week => !teamsAlreadyPlaying(game, week))
         // pick a random week
         const randomWeekIndex = Math.floor(Math.random() * weeks.length)
         const week = weeks[randomWeekIndex]
         assignGame(game, week)
         // update weeks and filter for incomplete weeks
         weeks = store.getState().weeks.filter(week => week.games.length < settings.gamesPerWeek)
+    }
+}
+
+function teamsAlreadyPlaying(game, week) {
+    const teams = [game.homeTeam.id, game.awayTeam.id]
+    const teamsPlaying = []
+    week.games.forEach(game => teamsPlaying.push(...[game.homeTeam.id, game.awayTeam.id]))
+    console.log(teamsPlaying)
+    if (teamsPlaying.includes(teams[0]) || teamsPlaying.includes(teams[1])) {
+        return true
+    } else {
+        return false
     }
 }
 
