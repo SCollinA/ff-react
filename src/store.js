@@ -6,6 +6,7 @@ import uuid from 'uuid/v4';
 const defaultState = {
     settings: {
         numWeeks: 14,
+        numTeams: 12,
         gamesPerWeek: 6,
         numDivs: 2,
         teamsPerDiv: 6,
@@ -64,6 +65,10 @@ const defaultState = {
 }
 
 // consts
+const RESET_SCHEDULE = {
+    type: 'RESET_SCHEDULE'
+}
+
 const STORE_SETTINGS = {
     type: 'STORE_SETTINGS'
 }
@@ -89,6 +94,13 @@ const ASSIGN_GAME = {
 }
 
 // exports
+export const resetSchedule = () => {
+    return {
+        ...RESET_SCHEDULE,
+        defaultState
+    }
+}
+
 export const storeSettings = (settings) => {
     return {
         ...STORE_SETTINGS,
@@ -149,6 +161,8 @@ const game = (state=defaultState, action) => {
         return state;
     }
     switch(action.type) {
+        case RESET_SCHEDULE.type:
+            return defaultState
         case STORE_SETTINGS.type:
             return {
                 ...state,
