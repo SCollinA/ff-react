@@ -54,7 +54,6 @@ function assignDivGames(divGames) {
     let {settings, weeks} = store.getState()
     // assign each one to schedule until none remain
     while (divGames.length > 0) {
-        console.log(divGames)
         const randomGameIndex = Math.floor(Math.random() * divGames.length)
         // pick and remove random game
         const game = divGames.splice(randomGameIndex, 1)[0]
