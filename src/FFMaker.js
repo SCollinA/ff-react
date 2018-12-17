@@ -4,13 +4,7 @@ export default function makeSchedule(userSettings) {
     resetSchedule()
     storeSettings(userSettings)
     setupLeague()
-    assignDivGames()
-    // find div games
-    // assign games to schedule
-    assignNonDivGames()
-    // find non-div games
-    // find home-away-compliant games
-    // assign to schedule
+    // assignGames()
 }
 
 function resetSchedule() {
@@ -41,33 +35,54 @@ function setupLeague() {
     addDivisions(settings.numDivs)
     addTeams(settings.numTeams)
     assignTeams(settings.teamsPerDiv)
+    addWeeks(settings.numWeeks)
     addGames()
 }
 
-function assignDivGames() {
-    // get all the div games
-    let divGames = findDivGames()
+function assignGames() {
+    // find div games
+    // find non-div games
+    const {divGames, nonDivGames} = findAllGames()
+    // assign games to schedule
+    assignDivGames(divGames)
+    // assign to schedule
+    assignNonDivGames(nonDivGames)
+}
+
+function assignDivGames(divGames) {
     // get all the weeks
     let {settings, weeks} = store.getState()
     // assign each one to schedule until none remain
     while (divGames.length > 0) {
         const randomGameIndex = Math.floor(Math.random() * divGames.length)
         // pick and remove random game
-        const game = divGames.splice(randomGameIndex, 1)
+        const game = divGames.splice(randomGameIndex, 1)[0]
         // pick a random week
         const randomWeekIndex = Math.floor(Math.random() * weeks.length)
         const week = weeks[randomWeekIndex]
         assignGame(game, week)
         // update weeks and filter for incomplete weeks
-        weeks = store.getState().weeks.filter(week => week.length < settings.gamesPerWeek)
+        weeks = store.getState().weeks.filter(week => week.games.length < settings.gamesPerWeek)
     }
 }
 
-function findDivGames() {
-    return []
+function findAllGames() {
+    const {games} = store.getState()
+    const divGames = []
+    const nonDivGames = []
+    for (let i = 0; i < games.length; i++) {
+        const game = games[i]
+        const {homeTeam, awayTeam} = game
+        if (homeTeam.div_id === awayTeam.div_id) {
+            divGames.push(game)
+        } else {
+            nonDivGames.push(game)
+        }
+    }
+    return {divGames, nonDivGames}
 }
 
-function assignNonDivGames() {
+async function assignNonDivGames() {
 
 }
 
@@ -109,7 +124,7 @@ function assignTeams(teamsPerDiv) {
         // while division is not full
         while (division.teams.length < teamsPerDiv) {
             // assign random team to division
-            const team = unassignedTeams.splice(Math.floor(Math.random() * unassignedTeams.length), 1)
+            const team = unassignedTeams.splice(Math.floor(Math.random() * unassignedTeams.length), 1)[0]
             assignTeam(team, division)
             // update division
             divisions = store.getState().divisions
@@ -120,6 +135,16 @@ function assignTeams(teamsPerDiv) {
 
 function assignTeam(team, division) {
     store.dispatch(actions.assignTeam(team, division))
+}
+
+function addWeeks(numWeeks) {
+    for (let i = 0; i < numWeeks; i++) {
+        addWeek()
+    }
+}
+
+function addWeek() {
+    store.dispatch(actions.addWeek())
 }
 
 function addGames() {

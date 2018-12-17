@@ -85,6 +85,10 @@ const ASSIGN_TEAM = {
     type: 'ASSIGN_TEAM'
 }
 
+const ADD_WEEK = {
+    type: 'ADD_WEEK'
+}
+
 const ADD_GAME = {
     type: 'ADD_GAME'
 }
@@ -97,7 +101,6 @@ const ASSIGN_GAME = {
 export const resetSchedule = () => {
     return {
         ...RESET_SCHEDULE,
-        defaultState
     }
 }
 
@@ -123,7 +126,8 @@ export const addTeam = (teamName) => {
         ...ADD_TEAM,
         newTeam: {
             id: uuid(),
-            name: teamName
+            name: teamName,
+            div_id: null
         }
     }
 }
@@ -133,6 +137,16 @@ export const assignTeam = (team, division) => {
         ...ASSIGN_TEAM,
         team,
         division
+    }
+}
+
+export const addWeek = () => {
+    return {
+        ...ADD_WEEK,
+        newWeek: {
+            id: uuid(),
+            games: []
+        }
     }
 }
 
@@ -187,6 +201,16 @@ const game = (state=defaultState, action) => {
         case ASSIGN_TEAM.type:
             return {
                 ...state,
+                teams: state.teams.map(team => {
+                    if (team.id === action.team.id) {
+                        return {
+                            ...team,
+                            div_id: action.division.id
+                        }
+                    } else {
+                        return team
+                    }
+                }),
                 divisions: state.divisions.map(division => {
                     if (division.id === action.division.id) {
                         return {
@@ -201,6 +225,14 @@ const game = (state=defaultState, action) => {
                     }
                 })
             }
+        case ADD_WEEK.type:
+            return {
+                ...state,
+                weeks: [
+                    ...state.weeks,
+                    action.newWeek
+                ]
+            }
         case ADD_GAME.type:
             return {
                 ...state,
@@ -212,12 +244,12 @@ const game = (state=defaultState, action) => {
         case ASSIGN_GAME.type:
             return {
                 ...state,
-                schedule: state.schedule.map(week => {
+                weeks: state.weeks.map(week => {
                     if (week.id === action.week.id) {
                         return {
                             ...week,
                             games: [
-                                ...state.games,
+                                ...week.games,
                                 action.game
                             ]
                         }

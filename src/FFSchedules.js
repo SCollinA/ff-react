@@ -7,7 +7,7 @@ export default function FFSchedules(props) {
         <div className="FFSchedules">
             <h1>{props.title}</h1>
             <FFScheduleForm makeSchedule={props.makeSchedule}/>
-            <FFSchedule schedule={props.weeks} />
+            <FFSchedule weeks={props.weeks} />
         </div>
     )
 }
