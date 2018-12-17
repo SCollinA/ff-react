@@ -1,6 +1,6 @@
 import store, * as actions from './store'
 
-export default function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
+export default async function ffScheduleMaker({numTeams, numDivs, numPlayoffTeams}) {
     console.log('in the schedule maker')
     // get a copy of the schedule
     const {schedule} = store.getState()
@@ -98,7 +98,7 @@ function assignTeams(divisions, originalTeams) {
 }
 
 // this is the recursive function
-function addNextGame(league) {
+async function addNextGame(league) {
     let {schedule} = store.getState()
     const {teams, numWeeks} = league
     // go through each week

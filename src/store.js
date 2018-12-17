@@ -30,7 +30,6 @@ const DEL_GAME = {
 }
 
 export const makeSchedule = (scheduleInfo) => {
-    console.log('in the stores make schedule')
     ffScheduleMaker(scheduleInfo)
     return {
         ...MAKE_SCHEDULE,
