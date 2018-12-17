@@ -2,8 +2,6 @@
 import { createStore } from 'redux';
 
 import uuid from 'uuid/v4';
-import { stat } from 'fs';
-
 
 const defaultState = {
     settings: {
@@ -126,7 +124,7 @@ export const assignTeam = (team, division) => {
     }
 }
 
-export const addGame = (homeTeam, awayTeam) {
+export const addGame = (homeTeam, awayTeam) => {
     return {
         ...ADD_GAME,
         game: {
@@ -199,7 +197,7 @@ const game = (state=defaultState, action) => {
                         return {
                             ...week,
                             games: [
-                                ...games,
+                                ...state.games,
                                 action.game
                             ]
                         }
