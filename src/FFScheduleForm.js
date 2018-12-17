@@ -1,4 +1,5 @@
 import React from 'react'
+import addGames from './FFMaker'
 
 export default function FFScheduleForm(props) {
     return (
@@ -8,6 +9,7 @@ export default function FFScheduleForm(props) {
             console.log('in the ff schedule form')
             const { numPlayoffTeams, numDivs, numTeams } = event.target
             props.makeSchedule({numTeams: numTeams.value, numDivs: numDivs.value, numPlayoffTeams:  numPlayoffTeams.value})
+            props.addGames()
         }}
         >
             <label name="numTeams"># of teams</label>
