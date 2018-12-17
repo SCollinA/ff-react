@@ -1,118 +1,262 @@
 
 import { createStore } from 'redux';
-import ffScheduleMaker from './FFScheduleMaker';
 
-// import uuid from 'uuid/v4';
-
+import uuid from 'uuid/v4';
 
 const defaultState = {
-    schedule: []
+    settings: {
+        numWeeks: 14,
+        numTeams: 12,
+        gamesPerWeek: 6,
+        numDivs: 2,
+        teamsPerDiv: 6,
+        maxNonDivGames: 4,
+        maxHomeAwayGames: 7,
+    },
+    weeks: [ // schedule is list of weeks
+        // {
+        //     id: uuid(),
+        //     games: [ // weeks are lists of games
+        //         {   // games are two teams
+        //             id: uuid(),
+        //             homeTeam: {
+        //                 id: uuid(),
+        //                 name: 'HomeTeam'
+        //             },
+        //             awayTeam: {
+        //                 id: uuid(),
+        //                 name: 'AwayTeam'
+        //             }
+        //         }
+        //     ]
+        // }
+    ],
+    divisions: [
+        // {
+        //     id: uuid(),
+        //     teams: [
+        //         {
+        //             id: uuid(),
+        //             name: 'divTeam'
+        //         }
+        //     ]
+        // }
+    ],
+    teams: [
+        // {
+        //     id: uuid(),
+        //     name: 'sampleTeam'
+        // }
+    ],
+    games: [
+        // {
+        //     id: uuid(),
+        //     homeTeam: {
+        //         id: uuid(),
+        //         name: 'HomeTeam'
+        //     },
+        //     awayTeam: {
+        //         id: uuid(),
+        //         name: 'AwayTeam'
+        //     }
+        // }
+    ]
+
 }
 
-const MAKE_SCHEDULE = {
-    type: 'MAKE_SCHEDULE',
+// consts
+const RESET_SCHEDULE = {
+    type: 'RESET_SCHEDULE'
+}
+
+const STORE_SETTINGS = {
+    type: 'STORE_SETTINGS'
+}
+
+const ADD_DIVISION = {
+    type: 'ADD_DIVISION'
+}
+
+const ADD_TEAM = {
+    type: 'ADD_TEAM'
+}
+
+const ASSIGN_TEAM = {
+    type: 'ASSIGN_TEAM'
 }
 
 const ADD_WEEK = {
-    type: 'ADD_WEEK',
-}
-
-const DEL_WEEK = {
-    type: 'DEL_WEEK'
+    type: 'ADD_WEEK'
 }
 
 const ADD_GAME = {
-    type: 'ADD_GAME',
-};
-
-const DEL_GAME = {
-    type: 'DEL_GAME',
+    type: 'ADD_GAME'
 }
 
-export const makeSchedule = (scheduleInfo) => {
-    console.log('in the stores make schedule')
+const ASSIGN_GAME = {
+    type: 'ASSIGN_GAME'
+}
+
+// exports
+export const resetSchedule = () => {
     return {
-        ...MAKE_SCHEDULE,
-        schedule: ffScheduleMaker(scheduleInfo)
+        ...RESET_SCHEDULE,
     }
 }
 
-// export 
-export const addWeek = (numGames) => {
+export const storeSettings = (settings) => {
+    return {
+        ...STORE_SETTINGS,
+        settings
+    }
+}
+
+export const addDivision = () => {
+    return {
+        ...ADD_DIVISION,
+        newDivision: {
+            id: uuid(),
+            teams: []
+        }
+    }
+}
+
+export const addTeam = (teamName) => {
+    return {
+        ...ADD_TEAM,
+        newTeam: {
+            id: uuid(),
+            name: teamName,
+            div_id: null
+        }
+    }
+}
+
+export const assignTeam = (team, division) => {
+    return {
+        ...ASSIGN_TEAM,
+        team,
+        division
+    }
+}
+
+export const addWeek = () => {
     return {
         ...ADD_WEEK,
-        week: new Array(numGames)
+        newWeek: {
+            id: uuid(),
+            games: []
+        }
     }
 }
 
-// export 
-export const deleteWeek = () => {
-    return {
-        ...DEL_WEEK
-    }
-}
-
-// export 
-export const addGame = (game) => {
+export const addGame = (homeTeam, awayTeam) => {
     return {
         ...ADD_GAME,
-        game
-    };
-};
-
-// export 
-export const deleteGame = () => {
-    return {
-        ...DEL_GAME,
+        newGame: {
+            id: uuid(),
+            homeTeam,
+            awayTeam
+        }
     }
 }
 
+export const assignGame = (game, week) => {
+    return {
+        ...ASSIGN_GAME,
+        game,
+        week
+    }
+}
 
 //Reducer
-
 const game = (state=defaultState, action) => {
     if (!action) {
         return state;
     }
     switch(action.type) {
-        case MAKE_SCHEDULE.type:
+        case RESET_SCHEDULE.type:
+            return defaultState
+        case STORE_SETTINGS.type:
             return {
-                schedule: action.schedule
+                ...state,
+                settings: action.settings
+            }
+        case ADD_DIVISION.type:
+            return {
+                ...state,
+                divisions: state.divisions ? [
+                    ...state.divisions,
+                    action.newDivision
+                ] : [action.newDivision]
+            }
+        case ADD_TEAM.type:
+            return {
+                ...state,
+                teams: [
+                    ...state.teams,
+                    action.newTeam
+                ]
+            }
+        case ASSIGN_TEAM.type:
+            return {
+                ...state,
+                teams: state.teams.map(team => {
+                    if (team.id === action.team.id) {
+                        return {
+                            ...team,
+                            div_id: action.division.id
+                        }
+                    } else {
+                        return team
+                    }
+                }),
+                divisions: state.divisions.map(division => {
+                    if (division.id === action.division.id) {
+                        return {
+                            ...division,
+                            teams: [
+                                ...division.teams,
+                                action.team
+                            ]
+                        }
+                    } else {
+                        return division
+                    }
+                })
             }
         case ADD_WEEK.type:
             return {
-                schedule: [
-                    ...state.schedule,
-                    action.week
+                ...state,
+                weeks: [
+                    ...state.weeks,
+                    action.newWeek
                 ]
-            }
-        case DEL_WEEK.type:
-            return {
-                // remove last week
-                schedule: [...state.schedule.slice(0, state.schedule.length - 2)]
             }
         case ADD_GAME.type:
             return {
-                // schedule must have one week
-                schedule: state.schedule.length > 0 ?
-                 [    // every week prior to this week
-                    ...state.schedule.slice(0, state.schedule.length - 2),
-                    [
-                        ...state.schedule[state.schedule.length - 1],
-                        action.game
-                    ] 
-                ] : state.schedule
-                    
-            }
-        case DEL_GAME.type:
-            const lastWeek = state.schedule.length > 0 ? state.schedule[state.schedule.length - 1] : []
-            return {
-                schedule: [
-                    // remove last week,
-                    ...state.schedule.slice(0, state.schedule.length - 2),
-                    // then remove last game
-                    lastWeek.slice(0, state.schedule.length - 2)
+                ...state,
+                games: [
+                    ...state.games,
+                    action.newGame
                 ]
+            }
+        case ASSIGN_GAME.type:
+            return {
+                ...state,
+                weeks: state.weeks.map(week => {
+                    if (week.id === action.week.id) {
+                        return {
+                            ...week,
+                            games: [
+                                ...week.games,
+                                action.game
+                            ]
+                        }
+                    } else {
+                        return week
+                    }
+                })
             }
         default:
             return state;
@@ -124,6 +268,6 @@ const store = createStore(
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
 
-store.subscribe(() => console.log(store.getState()))
+// store.subscribe(() => console.log(store.getState()))
 
 export default store;
