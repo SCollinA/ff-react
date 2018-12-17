@@ -55,7 +55,6 @@ const DEL_GAME = {
 export const makeSchedule = (userSettings) => {
     return {
         ...MAKE_SCHEDULE,
-        ...defaultState,
         userSettings,
     }
 }
@@ -63,43 +62,44 @@ export const makeSchedule = (userSettings) => {
 export const addTeam = (team) => {
     return {
         ...ADD_TEAM,
-        league: {
-            ...league,
-            teams: [
-                ...teams,
-                team
-            ]
-        }
+        team
+        // league: {
+        //     ...league,
+        //     teams: [
+        //         ...teams,
+        //         team
+        //     ]
+        // }
     }
 }
 
 export const addDivision = () => {
     return {
         ...ADD_DIVISION,
-        league: {
-            ...league,
-            divisions: [
-                ...divisions,
-                []
-            ]
-        }
+        // league: {
+        //     ...league,
+        //     divisions: [
+        //         ...divisions,
+        //         []
+        //     ]
+        // }
     }
 }
 
 export const assignTeam = ({team, divIndex}) => {
     return {
         ...ASSIGN_TEAM,
-        league: {
-            ...league,
-            divisions: [
-                ...divisions.slice(0, divIndex),
-                [
-                    ...divisions[divIndex],
-                    team
-                ],
-                ...divisions.slice(divIndex)
-            ]
-        }
+        // league: {
+        //     ...league,
+        //     divisions: [
+        //         ...divisions.slice(0, divIndex),
+        //         [
+        //             ...divisions[divIndex],
+        //             team
+        //         ],
+        //         ...divisions.slice(divIndex)
+        //     ]
+        // }
     }
 }
 
@@ -107,7 +107,7 @@ export const assignTeam = ({team, divIndex}) => {
 export const addWeek = () => {
     return {
         ...ADD_WEEK,
-        week: []
+        // week: []
     }
 }
 
@@ -143,27 +143,48 @@ const game = (state=defaultState, action) => {
     switch(action.type) {
         case MAKE_SCHEDULE.type:
             return {
-                league: action.league,
-                schedule: action.schedule,
+                ...defaultState,
                 userSettings: action.userSettings,
             }
         case ADD_TEAM.type:
             return {
-                league: action.league
+                league: {
+                    ...league,
+                    teams: [
+                        ...teams,
+                        action.team
+                    ]
+                }
             }
         case ADD_DIVISION.type:
             return {
-                league: action.league
+                league: {
+                    ...state.league,
+                    divisions: [
+                        ...state.league.divisions,
+                        []
+                    ]
+                }
             }
         case ASSIGN_TEAM.type:
             return {
-                league: action.league
+                league: {
+                    ...state.league,
+                    divisions: [
+                        ...state.league.divisions.slice(0, divIndex),
+                        [
+                            ...state.league.divisions[divIndex],
+                            team
+                        ],
+                        ...state.league.divisions.slice(divIndex)
+                    ]
+                }
             }
         case ADD_WEEK.type:
             return {
                 schedule: [
                     ...state.schedule,
-                    action.week
+                    []
                 ]
             }
         case DEL_WEEK.type:
