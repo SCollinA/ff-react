@@ -39,7 +39,7 @@ function setupLeague() {
     addGames()
 }
 
-function assignGames() {
+async function assignGames() {
     // find div games
     // find non-div games
     const {divGames, nonDivGames} = findAllGames()
@@ -50,11 +50,11 @@ function assignGames() {
 }
 
 function assignDivGames(divGames) {
-    console.log(divGames)
     // get all the weeks
     let {settings, weeks} = store.getState()
     // assign each one to schedule until none remain
     while (divGames.length > 0) {
+        console.log(divGames)
         const randomGameIndex = Math.floor(Math.random() * divGames.length)
         // pick and remove random game
         const game = divGames.splice(randomGameIndex, 1)[0]
@@ -83,8 +83,8 @@ function findAllGames() {
     return {divGames, nonDivGames}
 }
 
-async function assignNonDivGames() {
-
+function assignNonDivGames(nonDivGames) {
+    // console.log(nonDivGames)
 }
 
 function assignGame(game, week) {
